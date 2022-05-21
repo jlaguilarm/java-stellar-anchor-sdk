@@ -46,7 +46,7 @@ data:
         # clientAttributionDenyList: # use this if we want to black list.
         authTimeout: 900
         jwtTimeout: 86400
-        signingSeed: [ASK STELLAR]
+        signingSeed: SBTBRGMPWNLXOZQQQXXZRJKCZPYTAZT5FC4VEAECF2HOBCONTSH4EXKS
       # sep-12
       sep12:
         enabled: true
@@ -142,10 +142,10 @@ data:
     spring:
       logging:
         level:
-          root: INFO
-          org.springframework: INFO
-          org.springframework.web.filter: INFO
-          org.stellar: INFO
+          root: DEBUG
+          org.springframework: DEBUG
+          org.springframework.web.filter: DEBUG
+          org.stellar: DEBUG
       mvc:
         async.request-timeout: 6000
   stellar-wks.toml: |

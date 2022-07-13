@@ -192,7 +192,7 @@ public class Sep31Service {
         .build();
   }
 
-  void updateAmounts() throws AnchorException {
+  private void updateAmounts() throws AnchorException {
     Sep31PostTransactionRequest request = Context.get().getRequest();
     if (request.getQuoteId() != null) {
       updateTxAmountsBasedOnQuote();
@@ -313,8 +313,8 @@ public class Sep31Service {
     return fromTransactionToResponse(savedTxn);
   }
 
-  void validatePatchTransactionFields(Sep31Transaction txn, Sep31PatchTransactionRequest request)
-      throws BadRequestException {
+  private void validatePatchTransactionFields(
+      Sep31Transaction txn, Sep31PatchTransactionRequest request) throws BadRequestException {
     Map<String, AssetInfo.Sep31TxnFieldSpec> expectedFields =
         txn.getRequiredInfoUpdates().getTransaction();
     Map<String, String> fields = request.getFields().getTransaction();
@@ -331,7 +331,7 @@ public class Sep31Service {
     }
   }
 
-  void preValidateQuote() throws AnchorException {
+  private void preValidateQuote() throws AnchorException {
     Sep31PostTransactionRequest request = Context.get().getRequest();
     AssetInfo assetInfo = Context.get().getAsset();
     boolean isQuotesRequired = assetInfo.getSep31().isQuotesRequired();
@@ -384,7 +384,7 @@ public class Sep31Service {
     Context.get().setQuote(quote);
   }
 
-  void updateFee() throws AnchorException {
+  private void updateFee() throws AnchorException {
     Sep38Quote quote = Context.get().getQuote();
     if (quote != null) {
       if (quote.getFee() == null) {
@@ -421,7 +421,7 @@ public class Sep31Service {
     Context.get().setFee(fee);
   }
 
-  void validateSenderAndReceiver() throws AnchorException {
+  private void validateSenderAndReceiver() throws AnchorException {
     String receiverId = Context.get().getRequest().getReceiverId();
     if (receiverId == null) {
       infoF("'receiver_id' cannot be empty for request ({})", Context.get().getRequest());
@@ -468,7 +468,7 @@ public class Sep31Service {
     }
   }
 
-  void validateRequiredFields() throws AnchorException {
+  private void validateRequiredFields() throws AnchorException {
     String assetCode = Context.get().getAsset().getCode();
     Map<String, String> fields = Context.get().getTransactionFields();
     if (fields == null) {
@@ -511,7 +511,7 @@ public class Sep31Service {
     }
   }
 
-  Sep31GetTransactionResponse fromTransactionToResponse(Sep31Transaction txn) {
+  private Sep31GetTransactionResponse fromTransactionToResponse(Sep31Transaction txn) {
     return Sep31GetTransactionResponse.builder()
         .transaction(
             TransactionResponse.builder()
@@ -541,7 +541,7 @@ public class Sep31Service {
   }
 
   @SneakyThrows
-  static Sep31InfoResponse createFromAssets(List<AssetInfo> assetInfos) {
+  private static Sep31InfoResponse createFromAssets(List<AssetInfo> assetInfos) {
     Sep31InfoResponse response = new Sep31InfoResponse();
     response.setReceive(new HashMap<>());
     for (AssetInfo assetInfo : assetInfos) {

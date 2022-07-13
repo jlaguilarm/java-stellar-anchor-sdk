@@ -107,7 +107,7 @@ public class Sep31Controller {
     }
   }
 
-  private class Sep31CustomerInfoNeededResponse {
+  private static class Sep31CustomerInfoNeededResponse {
     String error;
     String type;
 

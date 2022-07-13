@@ -53,7 +53,7 @@ public class TransactionService {
   public GetTransactionResponse getTransaction(String txnId) throws AnchorException {
     JdbcSep31Transaction txn = (JdbcSep31Transaction) txnStore.findByTransactionId(txnId);
     if (txn == null) {
-      throw new NotFoundException(String.format("transaction (id=%s) is not found", txnId));
+      throw new NotFoundException(String.format("Transaction (id=%s) is not found", txnId));
     }
 
     GetTransactionResponse txnResponse = fromTransactionToResponse(txn);

@@ -20,6 +20,7 @@ import org.stellar.anchor.api.callback.FeeIntegration
 import org.stellar.anchor.api.callback.GetFeeResponse
 import org.stellar.anchor.api.exception.AnchorException
 import org.stellar.anchor.api.exception.BadRequestException
+import org.stellar.anchor.api.exception.NotFoundException
 import org.stellar.anchor.api.exception.SepValidationException
 import org.stellar.anchor.api.sep.AssetInfo
 import org.stellar.anchor.api.sep.sep12.Sep12GetCustomerRequest
@@ -743,5 +744,24 @@ class Sep31ServiceTest {
         .stellarMemoType("")
         .build()
     assertEquals(wantResponse, gotResponse)
+  }
+
+  @Test
+  fun test_getTransaction_failure() {
+    // empty "id"
+    var ex = assertThrows<AnchorException> { sep31Service.getTransaction(null) }
+    assertInstanceOf(BadRequestException::class.java, ex)
+    assertEquals("'id' is not provided", ex.message)
+
+    // transaction not found
+    val txIdSlot = slot<String>()
+    every { txnStore.findByTransactionId(capture(txIdSlot)) } returns null
+
+    ex = assertThrows { sep31Service.getTransaction("not-found-id") }
+    assertInstanceOf(NotFoundException::class.java, ex)
+    assertEquals("Transaction (id=not-found-id) not found", ex.message)
+
+    verify(exactly = 1) { txnStore.findByTransactionId("not-found-id") }
+    assertEquals("not-found-id", txIdSlot.captured)
   }
 }

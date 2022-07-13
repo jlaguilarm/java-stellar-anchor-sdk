@@ -270,7 +270,7 @@ public class Sep31Service {
     Sep31Transaction txn = sep31TransactionStore.findByTransactionId(id);
     if (txn == null) {
       infoF("Transaction ({}) not found", id);
-      throw new NotFoundException(String.format("transaction (id=%s) not found", id));
+      throw new NotFoundException(String.format("Transaction (id=%s) not found", id));
     }
 
     return fromTransactionToResponse(txn);
@@ -285,7 +285,7 @@ public class Sep31Service {
 
     if (txn == null) {
       infoF("Transaction ({}) not found", request.getId());
-      throw new NotFoundException(String.format("transaction (id=%s) not found", request.getId()));
+      throw new NotFoundException(String.format("Transaction (id=%s) not found", request.getId()));
     }
 
     // validate if the transaction is in the pending_transaction_info_update status
@@ -293,7 +293,7 @@ public class Sep31Service {
         txn.getStatus(), SepTransactionStatus.PENDING_TRANSACTION_INFO_UPDATE.toString())) {
       infoF("Transaction ({}) does not need update", txn.getId());
       throw new BadRequestException(
-          String.format("transaction (id=%s) does not need update", txn.getId()));
+          String.format("Transaction (id=%s) does not need update", txn.getId()));
     }
 
     validatePatchTransactionFields(txn, request);

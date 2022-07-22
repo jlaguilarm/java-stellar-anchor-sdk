@@ -49,7 +49,7 @@ variable "anchor_config_build_spec" {
 
 variable "anchor_config_repository" {
   type = string
-  default = "https://github.com/reecexlm/java-stellar-anchor-sdk"
+  default = "https://github.com/jlaguilarm/java-stellar-anchor-sdk.git"
 }
 
 variable "aws_account" {

@@ -16,7 +16,7 @@ resource "aws_ecr_repository" "anchor_config" {
 }
 
 resource "aws_s3_bucket" "anchor_config" {
-  bucket = "${var.environment}_RCH-anchor-config"
+  bucket = "${var.environment}-rch-anchor-config"
   tags = {
     Environment = "${var.environment}"
   }
@@ -200,7 +200,7 @@ resource "aws_codebuild_project" "codebuild_config" {
 
       environment_variable {
         name  = "ANCHOR_CONFIG_S3_BUCKET"
-        value = "${var.environment}_RCH-anchor-config"
+        value = "${var.environment}-rch-anchor-config"
       }
       environment_variable {
        name  = "ANCHOR_CONFIG_ECR_REPO"

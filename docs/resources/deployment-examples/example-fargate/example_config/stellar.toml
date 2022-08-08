@@ -2,12 +2,12 @@ ACCOUNTS = ["GCHLHDBOKG2JWMJQBTLSL5XG6NO7ESXI2TAQKZXCXWXB5WI2X6W233PR"]
 VERSION = "0.1.0"
 NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
 SIGNING_KEY = "GDAAXJZ6NJFVLYQTZSMBMOY44JVITKMRVPPPZABTMX6S6HDQI66WNK7S"
-TRANSFER_SERVER = "https://www.stellaranchordemo.com/sep6"
-TRANSFER_SERVER_SEP0024 = "https://www.stellaranchordemo.com/sep24"
-WEB_AUTH_ENDPOINT = "https://www.stellaranchordemo.com/auth"
-KYC_SERVER = "https://www.stellaranchordemo.com/sep12"
-DIRECT_PAYMENT_SERVER = "https://www.stellaranchordemo.com/sep31"
-ANCHOR_QUOTE_SERVER = "https://www.stellaranchordemo.com/sep38"
+TRANSFER_SERVER = "https://www.dev.redchapina.com/sep6"
+TRANSFER_SERVER_SEP0024 = "https://www.dev.redchapina.com/sep24"
+WEB_AUTH_ENDPOINT = "https://www.dev.redchapina.com/auth"
+KYC_SERVER = "https://www.dev.redchapina.com/sep12"
+DIRECT_PAYMENT_SERVER = "https://www.dev.redchapina.com/sep31"
+ANCHOR_QUOTE_SERVER = "https://www.dev.redchapina.com/sep38"
 
 [[CURRENCIES]]
 code = "USDC"

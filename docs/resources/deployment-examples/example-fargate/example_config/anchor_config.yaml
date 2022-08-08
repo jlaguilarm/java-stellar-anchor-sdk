@@ -59,7 +59,7 @@ app-config:
     horizonUrl: https://horizon-testnet.stellar.org
 
     # The URL where the platform server can be accessed by the client.
-    hostUrl: https://www.stellaranchordemo.com
+    hostUrl: https://www.dev.redchapina.com
 
     # The supported languages defined by RFC4646 (https://datatracker.ietf.org/doc/html/rfc4646)
     # Currently, only "en" is supported.
@@ -100,7 +100,7 @@ app-config:
     enabled: true
 
     # The `home_domain` property of SEP-10. https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md#request
-    homeDomain: www.stellaranchordemo.com
+    homeDomain: www.dev.redchapina.com
 
     # Set if the client attribution is required
     clientAttributionRequired: false
@@ -138,7 +138,7 @@ app-config:
   sep12:
     enabled: true
     # The callback API endpoint.
-    customerIntegrationEndpoint: http://ref.stellaranchordemo.com:8081
+    customerIntegrationEndpoint: http://ref.dev.redchapina.com:8081
 
   # sep-24
   sep24:
@@ -158,7 +158,7 @@ app-config:
     enabled: true
 
     # The callback API endpoint.
-    feeIntegrationEndPoint: http://ref.stellaranchordemo.com:8081
+    feeIntegrationEndPoint: http://ref.dev.redchapina.com:8081
 
     #
     # paymentType: used to determine how amount_in is calculated from amount in the POST /transaction call
@@ -180,7 +180,7 @@ app-config:
     enabled: true
 
     # The callback API endpoint.
-    quoteIntegrationEndPoint: http://ref.stellaranchordemo.com:8081
+    quoteIntegrationEndPoint: http://ref.dev.redchapina.com:8081
 
   circle:
     circleUrl: https://api-sandbox.circle.com

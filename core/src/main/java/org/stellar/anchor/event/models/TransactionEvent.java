@@ -4,11 +4,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import com.google.gson.annotations.SerializedName;
 import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.stellar.anchor.api.shared.Amount;
+import org.stellar.anchor.api.shared.Customers;
+import org.stellar.anchor.api.shared.Refund;
+import org.stellar.anchor.api.shared.StellarId;
+import org.stellar.anchor.api.shared.StellarTransaction;
 
 @Data
 @Builder
@@ -78,7 +83,7 @@ public class TransactionEvent implements AnchorEvent {
 
   @JsonProperty("stellar_transactions")
   @SerializedName("stellar_transactions")
-  StellarTransaction[] stellarTransactions;
+  List<StellarTransaction> stellarTransactions;
 
   @JsonProperty("external_transaction_id")
   @SerializedName("external_transaction_id")
@@ -104,16 +109,21 @@ public class TransactionEvent implements AnchorEvent {
     PENDING_SENDER("pending_sender"),
     PENDING_STELLAR("pending_stellar"),
     PENDING_CUSTOMER_INFO_UPDATE("pending_customer_info_update"),
-    PENDING_TRANSACTION_INFO_UPDATE("pending_transaction_info_update"),
     PENDING_RECEIVER("pending_receiver"),
     PENDING_EXTERNAL("pending_external"),
     COMPLETED("completed"),
+    EXPIRED("expired"),
     ERROR("error");
 
     @JsonValue public final String status;
 
     Status(String status) {
       this.status = status;
+    }
+
+    @Override
+    public String toString() {
+      return this.status;
     }
 
     public static Status from(String statusStr) {

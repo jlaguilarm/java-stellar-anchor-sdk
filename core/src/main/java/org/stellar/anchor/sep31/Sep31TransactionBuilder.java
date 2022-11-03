@@ -1,9 +1,11 @@
 package org.stellar.anchor.sep31;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import org.stellar.anchor.api.sep.AssetInfo;
-import org.stellar.anchor.event.models.StellarId;
+import org.stellar.anchor.api.shared.StellarId;
+import org.stellar.anchor.api.shared.StellarTransaction;
 
 public class Sep31TransactionBuilder {
   final Sep31Transaction txn;
@@ -26,6 +28,11 @@ public class Sep31TransactionBuilder {
 
   public Sep31TransactionBuilder statusEta(Long statusEta) {
     txn.setStatusEta(statusEta);
+    return this;
+  }
+
+  public Sep31TransactionBuilder amountExpected(String amountExpected) {
+    txn.setAmountExpected(amountExpected);
     return this;
   }
 
@@ -74,6 +81,16 @@ public class Sep31TransactionBuilder {
     return this;
   }
 
+  public Sep31TransactionBuilder updatedAt(Instant updatedAt) {
+    txn.setUpdatedAt(updatedAt);
+    return this;
+  }
+
+  public Sep31TransactionBuilder transferReceivedAt(Instant transferReceivedAt) {
+    txn.setTransferReceivedAt(transferReceivedAt);
+    return this;
+  }
+
   public Sep31TransactionBuilder startedAt(Instant startedAt) {
     txn.setStartedAt(startedAt);
     return this;
@@ -89,6 +106,11 @@ public class Sep31TransactionBuilder {
     return this;
   }
 
+  public Sep31TransactionBuilder stellarTransactions(List<StellarTransaction> stellarTransactions) {
+    txn.setStellarTransactions(stellarTransactions);
+    return this;
+  }
+
   public Sep31TransactionBuilder externalTransactionId(String externalTransactionId) {
     txn.setExternalTransactionId(externalTransactionId);
     return this;
@@ -99,7 +121,7 @@ public class Sep31TransactionBuilder {
     return this;
   }
 
-  public Sep31TransactionBuilder refunds(Sep31Transaction.Refunds refunds) {
+  public Sep31TransactionBuilder refunds(Refunds refunds) {
     txn.setRefunds(refunds);
     return this;
   }

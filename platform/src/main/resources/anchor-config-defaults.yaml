@@ -13,7 +13,7 @@ stellar:
     #
     # Sets how the application configuration values are read.
     #
-    #  If `type` is `config-spring-property`, the platform server will use the Spring's `@ConfigruationProperties` to
+    #  If `type` is `config-spring-property`, the platform server will use the Spring's `@ConfigurationProperties` to
     #      read populate the configuration values.
     #
     #  `config-spring-property` is the only `type` value supported in MVP.
@@ -30,8 +30,9 @@ stellar:
     #
     data-access:
       type: data-spring-jdbc
-      settings: data-spring-jdbc-h2              # The absolute location of the configuration data in this yaml file
-      #settings: data-spring-jdbc-local-postgres      # use local postgres instance
+      settings: data-spring-jdbc-sqlite                # The absolute location of the configuration data in this yaml file
+      #settings: data-spring-jdbc-h2                   # use in-memory database. It cannot be shared between server and observer though.
+      #settings: data-spring-jdbc-local-postgres       # use local postgres instance
       #settings: data-spring-jdbc-aws-aurora-postgres  # use AWS Aurora Postgres with IAM authentication
     #
     # Sets how the generates the logging information
@@ -75,6 +76,9 @@ app-config:
 
     # The secret key of JWT encryption
     jwtSecretKey: ${JWT_SECRET}
+
+  anchor-callback:
+    endpoint: http://localhost:8081
 
   # These are secrets shared between Anchor and Platform that are used to safely communicate from `Platform->Anchor`
   # and `Anchor->Platform`, specially when they are in different clusters.
@@ -144,8 +148,11 @@ app-config:
     # network.
     signingSeed: ${SEP10_SIGNING_SEED}
 
-    # The list of omnibus account.
+    # The list of omnibus accounts (comma separated).
     # The detail of the SEP-10 omnibus account is described at: https://github.com/stellar/stellar-protocol/blob/master/ecosystem/sep-0010.md#memos
+    # omnibusAccountList: |
+    #   GAB24L6CPBKSMQOBXJ5PRA6I66X4TGZHPAEI2CMPNLC6I2WX646OYCAV,
+    #   GAB24L6CPBKSMQOBXJ5PRA6I66X4TGZHPAEI2CMPNLC6I2WX646OYCAA
     omnibusAccountList:
 
     # Require authenticating clients to be in the omnibusAccountList
@@ -174,8 +181,11 @@ app-config:
   sep31:
     enabled: true
 
-    # The callback API endpoint.
+    # The /fee callback API endpoint.
     feeIntegrationEndPoint: http://localhost:8081
+
+    # The /unique_address callback API endpoint.
+    uniqueAddressIntegrationEndPoint: http://localhost:8081
 
     #
     # paymentType: used to determine how amount_in is calculated from amount in the POST /transaction call
@@ -190,7 +200,8 @@ app-config:
     # Possible values:
     #     self: the memo and memo type are generated in the local code, and the distribution account is used for the deposit address.
     #     circle: the memo and memo type are generated through Circle API, as well as the deposit address.
-    depositInfoGeneratorType: self # self or circle
+    #     api: the memo and memo type are generated through calling the anchor's GET /unique_address endpoint.
+    depositInfoGeneratorType: self # self or circle or api
 
   # sep-38
   sep38:
@@ -284,8 +295,8 @@ data-spring-jdbc-sqlite:
   spring.jpa.hibernate.show_sql: false
   spring.datasource.url: jdbc:sqlite:anchor-proxy.db
   spring.datasource.driver-class-name: org.sqlite.JDBC
-  spring.datasource.max-active: 1 # For SQLite, set this to 1 to avoid database file lock exception.
-  spring.datasource.initial-size: 1 # For SQLite, set this to 1 to avoid database file lock exception.
+  spring.datasource.max-active: 2 # For SQLite, set this to 2 to avoid database file lock exception, while letting both sep-server and stellar-observer use it.
+  spring.datasource.initial-size: 2 # For SQLite, set this to 2 to avoid database file lock exception, while letting both sep-server and stellar-observer use it.
   spring.datasource.username: ${SQLITE_USERNAME}
   spring.datasource.password: ${SQLITE_PASSWORD}
   spring.mvc.converters.preferred-json-mapper: gson
@@ -294,7 +305,6 @@ data-spring-jdbc-sqlite:
 # settings for aurora postgres connection using IAM for authentication
 # NOTE: AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and AWS_REGION environment variables need to be set
 data-spring-jdbc-aws-aurora-postgres:
-  spring.jpa.generate-ddl: true
   spring.jpa.database: POSTGRESQL
   spring.jpa.show-sql: false
   spring.datasource.driver-class-name: org.postgresql.Driver
@@ -309,7 +319,6 @@ data-spring-jdbc-aws-aurora-postgres:
   spring.flyway.locations: classpath:/db/migration
 
 data-spring-jdbc-local-postgres:
-  spring.jpa.generate-ddl: true
   spring.jpa.database: POSTGRESQL
   spring.jpa.show-sql: false
   spring.datasource.driver-class-name: org.postgresql.Driver

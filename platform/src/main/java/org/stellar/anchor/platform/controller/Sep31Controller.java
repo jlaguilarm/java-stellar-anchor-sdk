@@ -5,22 +5,24 @@ import static org.stellar.anchor.util.Log.debugF;
 import static org.stellar.anchor.util.Log.errorEx;
 
 import javax.servlet.http.HttpServletRequest;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.stellar.anchor.api.exception.AnchorException;
+import org.stellar.anchor.api.exception.Sep31CustomerInfoNeededException;
+import org.stellar.anchor.api.exception.Sep31MissingFieldException;
 import org.stellar.anchor.api.sep.AssetInfo.Sep31TxnFieldSpecs;
 import org.stellar.anchor.api.sep.sep31.*;
 import org.stellar.anchor.auth.JwtToken;
 import org.stellar.anchor.platform.condition.ConditionalOnAllSepsEnabled;
 import org.stellar.anchor.sep31.Sep31Service;
-import org.stellar.anchor.sep31.Sep31Service.Sep31CustomerInfoNeededException;
-import org.stellar.anchor.sep31.Sep31Service.Sep31MissingFieldException;
 
 @RestController
 @CrossOrigin(origins = "*")
 @RequestMapping("sep31")
 @ConditionalOnAllSepsEnabled(seps = {"sep31"})
+@Profile("default")
 public class Sep31Controller {
   private final Sep31Service sep31Service;
 

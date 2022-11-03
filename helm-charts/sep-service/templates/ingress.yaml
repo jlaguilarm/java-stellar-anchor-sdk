@@ -1,3 +1,5 @@
+# SEP Server
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -35,7 +37,7 @@ spec:
   - host: {{ tpl .host $ }}
     http:
       paths:
-        - path: {{ .path | quote }}
+        - path: {{ .path }}
           pathType: {{ .pathType| quote }}
           backend:
             service:

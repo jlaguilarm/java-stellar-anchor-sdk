@@ -13,6 +13,11 @@ anchor.settings:
   # The URL where the anchor reference server can be accessed by the platform.
   hostUrl: http://localhost:8081
 
+  # The Stellar wallet to which the customer will send the Stellar assets.
+  distributionWallet: GBN4NNCDGJO4XW4KQU3CBIESUJWFVBUZPOKUZHT7W7WRB7CWOA7BXVQF
+  distributionWalletMemo:
+  distributionWalletMemoType:
+
 # These are secrets shared between Anchor and Platform that are used to safely communicate from `Platform->Anchor`
 # and `Anchor->Platform`, specially when they are in different clusters.
 #
@@ -92,7 +97,6 @@ spring.mvc.converters.preferred-json-mapper: gson
 #
 # Spring Data JDBC settings for Postgres
 #
-#spring.jpa.generate-ddl: true
 #spring.jpa.database: POSTGRESQL
 #spring.jpa.show-sql: false
 #spring.datasource.driver-class-name: org.postgresql.Driver

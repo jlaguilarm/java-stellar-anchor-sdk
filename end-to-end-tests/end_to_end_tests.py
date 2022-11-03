@@ -1,5 +1,5 @@
 import argparse
-
+import os
 import requests
 import json
 import base64
@@ -20,6 +20,8 @@ from stellar_sdk.sep.federation import fetch_stellar_toml
 STELLAR_TESTNET_NETWORK_PASSPHRASE = "Test SDF Network ; September 2015"
 HORIZON_URI = "https://horizon-testnet.stellar.org"
 FRIENDBOT_URI = "https://friendbot.stellar.org"
+
+TRANSACTION_STATUS_COMPLETE = "completed"
 
 
 class Endpoints:
@@ -45,6 +47,7 @@ def get_anchor_platform_token(endpoints, public_key, secret_key):
         endpoints.ANCHOR_PLATFORM_AUTH_ENDPOINT,
         data={"transaction": envelope.to_xdr()},
     )
+    print(response)
     content = json.loads(response.content)
     return content["token"]
 
@@ -82,7 +85,10 @@ RECEIVING_CLIENT_PAYLOAD = {
     "address": "123 Washington Street",
     "city": "San Francisco",
     "state_or_province": "CA",
-    "address_country_code": "US"
+    "address_country_code": "US",
+    "clabe_number": "1234",
+    "bank_number": "abcd",
+    "bank_account_number": "1234"
 }
 
 
@@ -136,14 +142,28 @@ def send_asset(asset, source_secret_key, receiver_public_key, memo_hash):
     response = server.submit_transaction(transaction)
 
 
-def poll_transaction_status(endpoints, headers, transaction_id):
+def poll_transaction_status(endpoints, headers, transaction_id, status=TRANSACTION_STATUS_COMPLETE, timeout=120,
+                        poll_interval=2):
+    """
+    :param endpoints: Anchor Platform endpoints
+    :param headers: Request headers
+    :param transaction_id: Transaction ID to poll for completion
+    :param status: The desired status to poll for
+    :param timeout: Time (in seconds) to poll for the desired status
+    :param poll_interval: Time (in seconds) between each poll attempt
+    :return:
+    """
+    attempt = 1
     print("============= Polling Transaction Status from Anchor Platform ===========")
-    while True:
-        status = get_transaction(endpoints, headers, transaction_id)["transaction"]["status"]
-        print(f"transaction - {transaction_id} status is {status}")
-        if status == "completed":
+    while True and attempt*poll_interval <= timeout:
+        transaction_status = get_transaction(endpoints, headers, transaction_id)["transaction"]["status"]
+        print(f"attempt #{attempt} - transaction - {transaction_id} status is {transaction_status}")
+        if transaction_status == status:
             break
-        time.sleep(3)
+        attempt += 1
+        time.sleep(poll_interval)
+    else:
+        raise Exception("error: timed out while polling transaction status")
     print("=========================================================================")
 
 def test_sep_31_flow(endpoints, keypair, transaction_payload, sep38_payload=None):
@@ -179,8 +199,11 @@ def test_sep_31_flow(endpoints, keypair, transaction_payload, sep38_payload=None
     asset = Asset(transaction_payload["asset_code"], transaction_payload["asset_issuer"])
     send_asset(asset, secret_key, transaction["stellar_account_id"], memo_hash)
 
-    poll_transaction_status(endpoints, headers, transaction["id"])
-
+    try:
+        poll_transaction_status(endpoints, headers, transaction["id"])
+    except Exception as e:
+        print(e)
+        exit(1)
 
 def test_sep38_create_quote(endpoints, keypair, payload):
     token = get_anchor_platform_token(endpoints, keypair.public_key, keypair.secret)
@@ -191,12 +214,29 @@ def test_sep38_create_quote(endpoints, keypair, payload):
     quote = create_anchor_test_quote(endpoints, headers, payload)
     return quote
 
+def wait_for_anchor_platform_ready(domain, poll_interval=3, timeout=180):
+    print(f"polling {domain}/.well-known/stellar.toml to check for readiness")
+    attempt = 1
+    while attempt*poll_interval <= timeout:
+        try:
+            toml = fetch_stellar_toml(domain, use_http=True)
+            print("anchor platform is ready")
+            return
+        except Exception as e:
+            print(e)
+        attempt += 1
+        time.sleep(poll_interval)
+    else:
+        print("error: timed out while polling for readiness")
+        exit(1)
+
 
 if __name__ == "__main__":
     TESTS = [
         "sep31_flow",
         "sep31_flow_with_sep38",
-        "sep38_create_quote"
+        "sep38_create_quote",
+        "omnibus_allowlist"
     ]
 
     parser = argparse.ArgumentParser()
@@ -204,14 +244,22 @@ if __name__ == "__main__":
     #parser.add_argument('--load-size', "-ls", help="number of tests to execute (multithreaded)", type=int, default=1)
     parser.add_argument('--tests', "-t", nargs="*", help=f"names of tests to execute: {TESTS}", default=TESTS)
     parser.add_argument('--domain', "-d", help="The Anchor Platform endpoint", default="http://localhost:8000")
-    parser.add_argument('--secret', "-s", help="The secret key used for transactions")
+    parser.add_argument('--secret', "-s", help="The secret key used for transactions", default=os.environ.get('E2E_SECRET'))
+    parser.add_argument('--delay', help="Seconds to delay before running the tests", default=0)
 
     args = parser.parse_args()
 
+    if args.delay:
+        print(f"delaying start by {args.delay} seconds")
+        time.sleep(int(args.delay))
+
     domain = args.domain
+
+    wait_for_anchor_platform_ready(domain)
 
     endpoints = Endpoints(args.domain)
     keypair = Keypair.from_secret(args.secret)
+
     tests = TESTS if args.tests[0] == "all" else args.tests
 
     for test in tests:
@@ -287,5 +335,18 @@ if __name__ == "__main__":
                 "context": "sep31"
             }
             test_sep38_create_quote(endpoints, keypair, QUOTE_PAYLOAD_USDC_TO_JPYC)
+        elif test == "omnibus_allowlist":
+            print("####################### Testing Omnibus Allowlist #######################")
+            print(f"Omnibus Allowlist - testing with allowed key: {keypair.public_key}")
+            response = requests.get(endpoints.ANCHOR_PLATFORM_AUTH_ENDPOINT, {"account": keypair.public_key})
+            assert response.status_code == 200, f"return code should be 200, got: {response.status_code}"
+            print(f"Omnibus Allowlist - testing with allowed key: {keypair.public_key} - success")
+
+            random_kp = Keypair.random()
+            print(f"Omnibus Allowlist - testing with disallowed (random) key: {random_kp.public_key}")
+            response = requests.get(endpoints.ANCHOR_PLATFORM_AUTH_ENDPOINT, {"account": random_kp.public_key})
+            assert response.status_code == 403, f"return code should be 403, got: {response.status_code}"
+            print(f"Omnibus Allowlist - testing with disallowed (random) key: {random_kp.public_key} expecting 403 error - success")
+
         else:
             exit(f"Error: unknown test {test}")

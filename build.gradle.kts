@@ -1,33 +1,25 @@
+// The alias call in plugins scope produces IntelliJ false error which is suppressed here.
+@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
   java
-  id("com.diffplug.spotless") version "6.2.1"
+  alias(libs.plugins.spotless)
+  alias(libs.plugins.kotlin.jvm) apply false
 }
 
 tasks {
   register<Copy>("installLocalGitHook") {
-    from("scripts/pre-commit.sh") {
-      rename { it.removeSuffix(".sh") }
-    }
+    from("scripts/pre-commit.sh") { rename { it.removeSuffix(".sh") } }
     into(".git/hooks")
 
-    doLast {
-      project.exec {
-        commandLine("chmod",  "+x", ".git/hooks/pre-commit")
-      }
-    }
+    doLast { project.exec { commandLine("chmod", "+x", ".git/hooks/pre-commit") } }
   }
 
-  "build" {
-    dependsOn("installLocalGitHook")
-  }
+  "build" { dependsOn("installLocalGitHook") }
 }
 
 subprojects {
   apply(plugin = "java")
   apply(plugin = "com.diffplug.spotless")
-
-  group = "org.stellar.anchor-sdk"
-  version = "0.1.1"
 
   repositories {
     mavenLocal()
@@ -38,9 +30,6 @@ subprojects {
 
   /** Specifies JDK-11 */
   java { toolchain { languageVersion.set(JavaLanguageVersion.of(11)) } }
-
-  /** Enforces google-java-format at Java compilation. */
-  tasks.named("compileJava") { this.dependsOn("spotlessApply") }
 
   spotless {
     val javaVersion = System.getProperty("java.version")
@@ -70,15 +59,14 @@ subprojects {
   dependencies {
     // This is to fix the missing implementation in JSR305 that causes "unknown enum constant
     // When.MAYBE" warning.
-    implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("com.amazonaws:aws-java-sdk-sqs:1.12.200")
-    implementation("org.apache.kafka:kafka-clients:3.1.0")
-    implementation("org.apache.kafka:connect:3.1.0")
-    implementation("io.confluent:kafka-json-schema-serializer:7.0.1")
-    implementation("org.springframework.kafka:spring-kafka:2.8.4")
-    implementation("org.springframework.cloud:spring-cloud-aws-messaging:2.2.6.RELEASE")
-    implementation("org.postgresql:postgresql:42.3.5")
-    implementation("org.apache.logging.log4j:log4j-layout-template-json:2.14.1")
+    implementation(rootProject.libs.findbugs.jsr305)
+    implementation(rootProject.libs.aws.sqs)
+    implementation(rootProject.libs.postgresql)
+    implementation(rootProject.libs.bundles.kafka)
+    implementation(rootProject.libs.spring.kafka)
+
+    // TODO: we should use log4j2
+    implementation(rootProject.libs.log4j.template.json)
 
     // The common dependencies are declared here because we would like to have a uniform unit
     // testing across all subprojects.
@@ -86,30 +74,38 @@ subprojects {
     // We need to use the dependency string because the VERSION_CATEGORY feature isn't supported in
     // subproject task as of today.
     //
-    testImplementation("org.jetbrains.kotlin:kotlin-stdlib:1.6.10")
-    testImplementation("org.jetbrains.kotlin:kotlin-test-junit5:1.6.10")
-    testImplementation("io.mockk:mockk:1.12.2")
-    testImplementation("org.junit.platform:junit-platform-suite-engine:1.8.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.8.2")
-    testImplementation("org.skyscreamer:jsonassert:1.5.0")
+    testImplementation(rootProject.libs.bundles.junit)
+    testImplementation(rootProject.libs.jsonassert)
 
-    testAnnotationProcessor("org.projectlombok:lombok:1.18.22")
+    testAnnotationProcessor(rootProject.libs.lombok)
   }
 
   /**
    * This is to fix the Windows default cp-1252 character encoding that may potentially cause
    * compilation error
    */
-  tasks.compileJava { options.encoding = "UTF-8" }
+  tasks {
+    compileJava {
+      options.encoding = "UTF-8"
 
-  tasks.compileTestJava { options.encoding = "UTF-8" }
+      /** Enforces google-java-format at Java compilation. */
+      dependsOn("spotlessApply")
+    }
 
-  tasks.javadoc { options.encoding = "UTF-8" }
+    compileTestJava { options.encoding = "UTF-8" }
 
-  /** JUnit5 should be used for all subprojects. */
-  tasks.test { useJUnitPlatform() }
+    javadoc { options.encoding = "UTF-8" }
+
+    test {
+      useJUnitPlatform()
+
+      testLogging {
+        events("SKIPPED", "FAILED")
+        showExceptions = true
+        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+      }
+    }
+  }
 
   configurations {
     all {
@@ -119,3 +115,24 @@ subprojects {
     }
   }
 }
+
+allprojects {
+  group = "org.stellar.anchor-sdk"
+  version = "1.2.2"
+
+  tasks.jar {
+    manifest {
+      attributes(
+        mapOf(
+          "Implementation-Title" to project.name,
+          "Implementation-Version" to project.version
+        )
+      )
+    }
+  }
+}
+
+tasks.register("printVersionName") {
+  println(rootProject.version.toString())
+}
+

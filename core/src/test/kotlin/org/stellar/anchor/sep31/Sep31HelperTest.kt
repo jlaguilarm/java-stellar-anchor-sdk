@@ -10,7 +10,7 @@ import org.stellar.anchor.api.exception.BadRequestException
 
 class Sep31HelperTest {
   @Test
-  fun test_allAmountAvailable() {
+  fun `test all amount available`() {
     val txn = PojoSep31Transaction()
     txn.amountIn = "100"
     assertFalse(Sep31Helper.allAmountAvailable(txn))
@@ -37,9 +37,10 @@ class Sep31HelperTest {
         "pending_receiver",
         "pending_sender",
         "completed",
+        "expired",
         "error"]
   )
-  fun test_validateStatus(status: String) {
+  fun `test validate status`(status: String) {
     val txn = PojoSep31Transaction()
     txn.status = status
     Sep31Helper.validateStatus(txn)
@@ -48,7 +49,7 @@ class Sep31HelperTest {
   @ParameterizedTest
   @NullSource
   @ValueSource(strings = ["Error", "erroR", ""])
-  fun test_validateStatus_failure(status: String?) {
+  fun `test validate status failure`(status: String?) {
     val txn = PojoSep31Transaction()
     txn.status = status
     val ex = assertThrows<BadRequestException> { Sep31Helper.validateStatus(txn) }

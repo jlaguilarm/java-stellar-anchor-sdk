@@ -322,13 +322,13 @@ data-spring-jdbc-local-postgres:
   spring.jpa.database: POSTGRESQL
   spring.jpa.show-sql: false
   spring.datasource.driver-class-name: org.postgresql.Driver
-  spring.datasource.url: jdbc:postgresql://localhost:5431/anchorplatform
+  spring.datasource.url: jdbc:postgresql://localhost:5432/postgres
   spring.datasource.username: ${POSTGRES_USERNAME}
   spring.datasource.password: ${POSTGRES_PASSWORD}
   spring.mvc.converters.preferred-json-mapper: gson
   spring.flyway.user: ${POSTGRES_USERNAME}
   spring.flyway.password: ${POSTGRES_PASSWORD}
-  spring.flyway.url: jdbc:postgresql://localhost:5431/anchorplatform
+  spring.flyway.url: jdbc:postgresql://localhost:5432/postgres
   spring.flyway.locations: classpath:/db/migration
 
 data-spring-jdbc-h2:
